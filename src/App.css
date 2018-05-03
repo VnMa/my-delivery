@@ -16,10 +16,16 @@
 }
 
 .App > .main {
-    width: 75%;
+    width: 50%;
     float: left;
     padding: 8px;
     margin-bottom: 7px;
+}
+
+.order {
+    width: 25%;
+    float: right;
+    padding: 8px;
 }
 
 .drink a {
