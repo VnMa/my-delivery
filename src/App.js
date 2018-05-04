@@ -5,6 +5,8 @@ import DrinkItem from "./components/DrinkItem";
 import OrderItem from "./components/OrderItem";
 
 const currency = "VND";
+const VALID_COUPON = "REACT";
+const DISCOUNT = 10;
 class App extends Component {
   constructor(props) {
     super(props);
@@ -18,7 +20,9 @@ class App extends Component {
         { id: 2, name: "Oolong tea", price: 12000 },
         { id: 3, name: "Coffee", price: 15000 }
       ],
-      order: {}
+      order: {},
+      coupon: "",
+      validCoupon: false
     };
   }
 
@@ -39,13 +43,32 @@ class App extends Component {
   }
 
   totalPrice() {
-    return Object.values(this.state.order).reduce((acc, item) => {
+    console.debug("totalPrice: ...");
+    const { order, validCoupon } = this.state;
+    const rawTotal = Object.values(order).reduce((acc, item) => {
       return acc + item.price * item.quantity;
     }, 0);
+
+    return validCoupon ? rawTotal * (100 - DISCOUNT) / 100 : rawTotal;
+  }
+
+  onChange(e) {
+    console.debug("e: ", e.target.value);
+    const val = e.target.value;
+
+    const valid = val === VALID_COUPON;
+    this.setState({ ...this.state, coupon: val, validCoupon: valid });
+  }
+
+  onOrderItemChange(item) {
+    console.debug("onOrderItemChange: ", item);
+    const order = { ...this.state.order };
+    order[item.id] = { ...item };
+    this.setState({ ...this.state, order });
   }
 
   render() {
-    const { shops, drinks } = this.state;
+    const { shops, drinks, validCoupon } = this.state;
     return (
       <div className="App">
         <div className="menu">
@@ -68,15 +91,29 @@ class App extends Component {
 
           <h2>Coupon</h2>
 
-          <input />
+          <input
+            type="text"
+            value={this.state.coupon}
+            onChange={e => this.onChange(e)}
+          />
+
+          <div className={validCoupon ? "valid" : ""}>
+            This coupon is {validCoupon ? "" : "NOT"} valid
+          </div>
         </div>
         <div className="order">
           <h2>Order</h2>
           {this.orderToArr().map((o, index) => (
-            <OrderItem key={index} order={o} />
+            <OrderItem
+              key={index}
+              order={o}
+              onChange={this.onOrderItemChange.bind(this)}
+            />
           ))}
           <h2>Total</h2>
           {this.totalPrice()} {currency}
+          <br />
+          <span>{validCoupon ? `Discount ${DISCOUNT} %` : ""}</span>
         </div>
       </div>
     );
